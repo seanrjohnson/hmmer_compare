@@ -1,8 +1,8 @@
-"""Aligns and calculates similarity between hmmer3 profiles 
+"""Aligns and calculates alignment scores between hmmer3 profiles 
 
 Kind of like hhsearch except much slower and for hmmer3 profiles instead of hhsuite profiles.
 
-DISCLAIMER: this script is under development, I think the algorithm is correctly implemented, but I might change the output format and various other 
+DISCLAIMER: this script is under development, I think the algorithm is correctly implemented, but I might change the output format and various other details.
 
 Adapted from pseudocode in:
 Steinegger, Martin, Markus Meier, Milot Mirdita, Harald Vöhringer, Stephan J. Haunsberger, and Johannes Söding. “HH-Suite3 for Fast Remote Homology Detection and Deep Protein Annotation.” BMC Bioinformatics 20, no. 1 (September 14, 2019): 473. https://doi.org/10.1186/s12859-019-3019-7.
