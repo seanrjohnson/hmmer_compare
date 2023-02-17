@@ -65,3 +65,9 @@ Note that `scores_with_alignments.txt` can also be used as input to `table_to_tr
 
 I think this program could be thousands of times faster if the core algorithm was rewritten in C/cython (or maybe Rust). I haven't had time to do that, but I would be very grateful to anyone who does have time! Any other suggestions/contributions are also welcome.
 
+# References
+
+Adapted from pseudocode in:
+
+- Steinegger, Martin, Markus Meier, Milot Mirdita, Harald Vöhringer, Stephan J. Haunsberger, and Johannes Söding. “HH-Suite3 for Fast Remote Homology Detection and Deep Protein Annotation.” BMC Bioinformatics 20, no. 1 (September 14, 2019): 473. [https://doi.org/10.1186/s12859-019-3019-7](https://doi.org/10.1186/s12859-019-3019-7).
+- Söding, Johannes. “Protein Homology Detection by HMM–HMM Comparison.” Bioinformatics 21, no. 7 (April 1, 2005): 951–60. [https://doi.org/10.1093/bioinformatics/bti125](https://doi.org/10.1093/bioinformatics/bti125).
