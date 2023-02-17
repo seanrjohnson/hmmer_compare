@@ -10,7 +10,9 @@ Note: This package is a small slice of a more comprehensive tools suite that I h
 
 ## Download and extract the hmmer_compare package
 
-Go to the [hmmer_compare github page](https://github.com/seanrjohnson/hmmer_compare) and download and extract the zip file for the latest release (see the right side of the github page).
+Clone the repo or download a zip file of the repo.
+
+To download a zip of the repo, go to the [hmmer_compare github page](https://github.com/seanrjohnson/hmmer_compare) and download and extract the zip file for the latest release (see the right side of the github page).
 
 Extract the zip file.  In a terminal, navigate to the newly extracted folder and proceed with either the pip or Anaconda install instructions
 
@@ -27,7 +29,9 @@ On a system where you have python3 installed
 ### Install Anaconda (if you don't already have it)
 
 [https://docs.conda.io/en/main/miniconda.html](https://docs.conda.io/en/main/miniconda.html)
+
 or
+
 [https://docs.anaconda.com/anaconda/install/](https://docs.anaconda.com/anaconda/install/)
 
 
@@ -47,14 +51,14 @@ conda activate hmmer_compare
 # Examples
 
 starting in the same directory as this readme file
-## Creating a profile tree
+## Creating a UPGMA tree of hmmer3 profiles
 
 ```
 hmmer_compare.py -i test/data/pdonr_hmms.hmm -r test/data/pdonr_hmms.hmm -o scores.tsv
 table_to_tree.py -i scores.tsv -o pdonr_hmms.newick
 ```
 
-## Creating profile alignments
+## Creating hmmer3 profile alignments
 ```
 hmmer_compare.py -i test/data/pdonr_hmms.hmm -r test/data/pdonr_hmms.hmm -o scores_with_alignments.txt --alignments
 ```
