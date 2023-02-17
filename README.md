@@ -76,6 +76,8 @@ I think this program could be thousands of times faster if the core algorithm wa
 
 # References
 
+To cite this code, for now, please just cite this github url. When I use it in a manuscript, I'll post the reference to that paper and you can cite that.
+
 Adapted from pseudocode in:
 
 - Steinegger, Martin, Markus Meier, Milot Mirdita, Harald Vöhringer, Stephan J. Haunsberger, and Johannes Söding. “HH-Suite3 for Fast Remote Homology Detection and Deep Protein Annotation.” BMC Bioinformatics 20, no. 1 (September 14, 2019): 473. [https://doi.org/10.1186/s12859-019-3019-7](https://doi.org/10.1186/s12859-019-3019-7).
