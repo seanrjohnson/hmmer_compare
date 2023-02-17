@@ -6,7 +6,7 @@ It's kind of slow, so not suitable for comparing large numbers of profiles. More
 Note: This package is a small slice of a more comprehensive tools suite that I hope to make available before the end of 2023. So apart from bugfixes, I may not maintain it much (unless I decide to use it as a dependency for the broader suite).
 
 
-# INSTALLATION
+# Installation
 
 ## Download and extract the hmmer_compare package
 
