@@ -49,6 +49,8 @@ def hmmer_compare_to_matrix(input_file: Union[str, PathLike]) -> Tuple[List[str]
     indicies = OrderedDict() #dict[name]:index
     for line in f:
         parts = line.strip().split("\t")
+        if len(parts) != 3: # this allows us to parse files with alignments in them
+            continue
         query, reference, score = parts[0], parts[1], float(parts[2])
         values[(query,reference)] = score
         if query not in indicies:

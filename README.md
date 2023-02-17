@@ -1,5 +1,5 @@
 # hmmer_compare
-compare hmmer3 profiles and generate profile trees.
+compare hmmer3 profiles, generate profile alignments, and generate profile trees.
 
 It's kind of slow, so not suitable for comparing large numbers of profiles. More than 100 is ambitious.
 
@@ -44,13 +44,24 @@ This will create a new conda environment called "hmmer_compare".
 conda activate hmmer_compare
 ```
 
-# Example
+# Examples
+
+starting in the same directory as this readme file
+## Creating a profile tree
 
 ```
-
+hmmer_compare.py -i test/data/pdonr_hmms.hmm -r test/data/pdonr_hmms.hmm -o scores.tsv
+table_to_tree.py -i scores.tsv -o pdonr_hmms.newick
 ```
+
+## Creating profile alignments
+```
+hmmer_compare.py -i test/data/pdonr_hmms.hmm -r test/data/pdonr_hmms.hmm -o scores_with_alignments.txt --alignments
+```
+Note that `scores_with_alignments.txt` can also be used as input to `table_to_tree.py` as it will only read lines with three tab-separated columns, and thereby skip the alignments.
+
 
 # Contributing
 
-I think this program could be thousands of times faster if the core algorithm was rewritten in C/cython (or maybe Rust). I haven't had time to do that, but I would be very grateful to anyone who does have time!
+I think this program could be thousands of times faster if the core algorithm was rewritten in C/cython (or maybe Rust). I haven't had time to do that, but I would be very grateful to anyone who does have time! Any other suggestions/contributions are also welcome.
 
