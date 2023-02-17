@@ -65,6 +65,11 @@ Note that `scores_with_alignments.txt` can also be used as input to `table_to_tr
 
 I think this program could be thousands of times faster if the core algorithm was rewritten in C/cython (or maybe Rust). I haven't had time to do that, but I would be very grateful to anyone who does have time! Any other suggestions/contributions are also welcome.
 
+# Dependencies
+    - numpy
+    - scipy
+    - pyhmmer
+
 # References
 
 Adapted from pseudocode in:
