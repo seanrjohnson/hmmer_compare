@@ -1,5 +1,9 @@
 # hmmer_compare
-compare hmmer3 profiles
+compare hmmer3 profiles and generate profile trees.
+
+It's kind of slow, so not suitable for comparing large numbers of profiles. More than 100 is ambitious.
+
+Note: This package is a small slice of a more comprehensive tools suite that I hope to make available before the end of 2023. So apart from bugfixes, I may not maintain it much (unless I decide to use it as a dependency for the broader suite).
 
 
 # INSTALLATION
@@ -40,4 +44,13 @@ This will create a new conda environment called "hmmer_compare".
 conda activate hmmer_compare
 ```
 
+# Example
+
+```
+
+```
+
+# Contributing
+
+I think this program could be thousands of times faster if the core algorithm was rewritten in C/cython (or maybe Rust). I haven't had time to do that, but I would be very grateful to anyone who does have time!
 

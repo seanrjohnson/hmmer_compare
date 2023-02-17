@@ -22,11 +22,10 @@ import os
 from pathlib import Path
 import heapq
 from multiprocessing import Pool
-from hmmercompare import __version__
+from hmmercompare import __version__, RawAndDefaultsFormatter
+import warnings
 
 
-class RawAndDefaultsFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawTextHelpFormatter):
-    pass
 
 
 def read_hmms(hmm_files:Iterable[Union[str,os.PathLike]]) -> Dict[str, Dict[str,pyhmmer.plan7.HMM]]:
@@ -430,7 +429,7 @@ def main(argv):
     parser.add_argument('-r', "--reference", type=str, required=True, nargs='+',
                         help="Reference files. One or more hmm text files with one or more hmmer3 profiles.")
 
-    parser.add_argument('--score_cutoff', type=float, default = 15,
+    parser.add_argument('--score_cutoff', type=float, default = 0,
                         help="Report alignments with scores greater than or equal to this.") #TODO: what is a reasonable cutoff?
 
     parser.add_argument('-k', type=int, required=False, default=None,

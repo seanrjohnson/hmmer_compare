@@ -42,11 +42,13 @@ setuptools.setup(
     #extensions=EXTENSIONS,
     scripts=[
              'src/hmmercompare/hmmer_compare.py',
+             'src/hmmercompare/table_to_tree.py',
              ],
     install_requires=[
         "setuptools>=60.7",
         "pyhmmer",
         "numpy",
+        "scipy"
     ],
     python_requires=">=3.9"
 )
