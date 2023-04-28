@@ -12,5 +12,6 @@ dependencies:
   - pyhmmer~=0.6.0
   - numpy
   - scipy
+  - numba~=0.56.4
   - pip:
     - -e .

@@ -24,7 +24,8 @@ import heapq
 from multiprocessing import Pool
 from hmmercompare import __version__, RawAndDefaultsFormatter
 import warnings
-
+from numba import jit
+import numba as nb
 
 
 
@@ -58,16 +59,16 @@ def read_hmms(hmm_files:Iterable[Union[str,os.PathLike]]) -> Dict[str, Dict[str,
 
 #TODO: cythonize
 
-_SMM = 0
-_SMI = 1
-_SIM = 2
-_SDG = 3
-_SGD = 4
+_SMM:int = 0
+_SMI:int = 1
+_SIM:int = 2
+_SDG:int = 3
+_SGD:int = 4
 _TRACEBACK_DTYPE=np.uint64
 _STOP_FLAG = np.iinfo(_TRACEBACK_DTYPE).max
 
-
-def max2(sMM, sXY, layer1, layer2) -> Tuple[float, int]:
+@jit(nb.typeof((1.0,1))(nb.float32, nb.float32, nb.uint64, nb.uint64),cache=True)
+def max2(sMM:float, sXY:float, layer1:int, layer2:int) -> Tuple[float, int]:
     if sMM > sXY:
         score = sMM
         bt = layer1
@@ -76,8 +77,8 @@ def max2(sMM, sXY, layer1, layer2) -> Tuple[float, int]:
         bt = layer2
     return score, bt
 
-
-def max6(sMM: float, sMI: float, sIM: float, sDG: float, sGD: float, sSTOP: float = 0.0) -> Tuple[float, int]:
+@jit(nb.typeof((1.0, 1))(nb.float32, nb.float32, nb.float32, nb.float32, nb.float32, nb.int64),cache=True)
+def max6(sMM: float, sMI: float, sIM: float, sDG: float, sGD: float, global_mode:int = 0) -> Tuple[float, int]:
     """
 
     Args:
@@ -93,10 +94,11 @@ def max6(sMM: float, sMI: float, sIM: float, sDG: float, sGD: float, sSTOP: floa
         Tuple[float, int]: score, backtrace_layer
 
     """
-    score = float("-inf")
+    score = -1000000000.0
     bt = None
+    sSTOP = 0 #if global_mode == 0 else float("-inf")
     
-    if sSTOP > sMM:
+    if sSTOP > sMM and global_mode == 0:
         score = sSTOP
         bt = _STOP_FLAG
     else:
@@ -118,14 +120,14 @@ def max6(sMM: float, sMI: float, sIM: float, sDG: float, sGD: float, sSTOP: floa
     
     return  score, bt
     
-
+@jit(nb.float32(nb.float32[:], nb.float32[:], nb.float32[:]),cache=True)
 def Saa(q:np.array, r:np.array, background:np.array) -> float: #TODO: test
     """calculate similarity scores for two amino acid distributions
 
     Args:
         q (np.array): array size 20, amino acid probabilities
         r (np.array): array size 20, amino acid probabilities
-        background (np.array): array size 20,amino acid background probabilities
+        background (np.array): array size 20, amino acid background probabilities
 
     Returns:
         float: score
@@ -133,37 +135,8 @@ def Saa(q:np.array, r:np.array, background:np.array) -> float: #TODO: test
 
     return np.log(np.sum(np.divide(np.multiply(q, r), background)))
 
-
-def compare_hmmer(qhmm:pyhmmer.plan7.HMM, rhmm:pyhmmer.plan7.HMM) -> Tuple[float, np.array, Tuple[int,int,int]]:
-    """Run the viterbi alignment algorithm to compare two plan7 HMM profiles
-
-    Args:
-        qhmm (pyhmmer.plan7.HMM): query HMM object
-        rhmm (pyhmmer.plan7.HMM): reference (target) HMM object
-
-    Raises:
-        ValueError: if hmms are not of the same alphabet
-
-    Returns:
-        Tuple[float, np.array, Tuple[int,int,int]]: score, backtrace, max_index (query_idx, ref_idx, layer)
-    """
-    if qhmm.alphabet != rhmm.alphabet:
-        raise ValueError(f"Error, cannot compare hmms with different alphabets: {qhmm.alphabet}, {rhmm.alphabet}.")
-    # alphabet_K = qhmm.alphabet.K
-    background = np.asarray(pyhmmer.plan7.Background(qhmm.alphabet).residue_frequencies) #TODO: could just store this as a constant
-
-    # raw probabilities
-    query_match_emissions=np.asarray(qhmm.match_emissions) # M + 1, K. Row 0 is entry probabilities, so emissions are unused, but it still needs to sum to 1.0, so it is [1.0, 0.0, 0.0, ...], but don't use it for any calcs
-    reference_match_emissions=np.asarray(rhmm.match_emissions) # M + 1, K. Row 0 is entry probabilities, so emissions are unused, but it still needs to sum to 1.0, so it is [1.0, 0.0, 0.0, ...], but don't use it for any calcs
-    
-    # query_insert_emissions=np.asarray(qhmm.insert_emissions) # row 0 is insert emissions for left-gaps (before the first match emission) 
-    # reference_insert_emissions=np.asarray(rhmm.insert_emissions) # row 0 is insert emissions for left-gaps (before the first match emission)
-
-    with np.errstate(divide='ignore'):
-        query_transitions=-1 * np.log(np.asarray(qhmm.transition_probabilities))  # M + 1, 7 probabilities are negative natural logs
-        reference_transitions=-1 * np.log(np.asarray(rhmm.transition_probabilities)) # M + 1, 7 probabilities are negative natural logs
-    
-    # print(np.asarray(qhmm.transition_probabilities))
+@jit(nb.void(nb.float32[:,:], nb.float32[:,:], nb.float32[:,:], nb.float32[:], nb.float32[:,:], nb.float32[:,:,:], nb.uint64[:,:,:], nb.float32[:,:], nb.int64),cache=True)
+def compare_hmmer_inner(query_transitions:np.array, query_match_emissions:np.array, reference_transitions:np.array, background:np.array, reference_match_emissions:np.array, scores:np.array, backtrace:np.array, match_scores:np.array, global_mode=0) -> None:
     TMM=0
     TMI=1
     TMD=2
@@ -179,10 +152,6 @@ def compare_hmmer(qhmm:pyhmmer.plan7.HMM, rhmm:pyhmmer.plan7.HMM) -> Tuple[float
     # 5: Dn -> Mn+1 
     # 6: Dn -> Dn+1 
 
-    scores = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0],5),dtype=np.double) # dim3 = SMM, SMI, SIM, SDG, SGD, for SXY, X is query, Y is reference
-    backtrace = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0],5),dtype=_TRACEBACK_DTYPE) #score_row, score_column, state_type (dim3 of scores array) TODO: should we account for alternative alignments, like by ties in the max fuctions?. TODO: what order of dimensions is best for caching?
-    match_scores = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0]),dtype=np.double) # scores for match states only, for backtrace
-    # values are flags to the previous state type. There is only one direction from each previous state, so directionality is implied in the state type
 
     backtrace[:,0,:] = _STOP_FLAG # stop backtrace at the left column
     backtrace[0,:,:] = _STOP_FLAG # stop backtrace at the top row
@@ -191,7 +160,7 @@ def compare_hmmer(qhmm:pyhmmer.plan7.HMM, rhmm:pyhmmer.plan7.HMM) -> Tuple[float
     # SIM = 2
     # SDG = 3
     # SGD = 4
-    
+
     for qi in range(1,query_match_emissions.shape[0]):
         for ri in range(1,reference_match_emissions.shape[0]):
 
@@ -203,6 +172,7 @@ def compare_hmmer(qhmm:pyhmmer.plan7.HMM, rhmm:pyhmmer.plan7.HMM) -> Tuple[float
                     scores[qi-1,ri-1,_SIM] - query_transitions[qi-1, TIM] - reference_transitions[ri-1, TMM], 
                     scores[qi-1,ri-1,_SDG] - query_transitions[qi-1, TDM] - reference_transitions[ri-1, TMM], 
                     scores[qi-1,ri-1,_SGD] - query_transitions[qi-1, TMM] - reference_transitions[ri-1, TDM],
+                    0 # global alignment
                  ) 
             backtrace[qi,ri,_SMM] = tb_layer
             #Saa_score = Saa(query_match_emissions[qi,:], reference_match_emissions[ri,:], background)
@@ -253,6 +223,44 @@ def compare_hmmer(qhmm:pyhmmer.plan7.HMM, rhmm:pyhmmer.plan7.HMM) -> Tuple[float
                 )
             backtrace[qi,ri,_SMI] = tb_layer
 
+def compare_hmmer(qhmm:pyhmmer.plan7.HMM, rhmm:pyhmmer.plan7.HMM) -> Tuple[float, np.array, Tuple[int,int,int]]:
+    """Run the viterbi alignment algorithm to compare two plan7 HMM profiles
+
+    Args:
+        qhmm (pyhmmer.plan7.HMM): query HMM object
+        rhmm (pyhmmer.plan7.HMM): reference (target) HMM object
+
+    Raises:
+        ValueError: if hmms are not of the same alphabet
+
+    Returns:
+        Tuple[float, np.array, Tuple[int,int,int]]: score, backtrace, max_index (query_idx, ref_idx, layer)
+    """
+    if qhmm.alphabet != rhmm.alphabet:
+        raise ValueError(f"Error, cannot compare hmms with different alphabets: {qhmm.alphabet}, {rhmm.alphabet}.")
+    # alphabet_K = qhmm.alphabet.K
+    background = np.asarray(pyhmmer.plan7.Background(qhmm.alphabet).residue_frequencies) #TODO: could just store this as a constant
+
+    # raw probabilities
+    query_match_emissions=np.asarray(qhmm.match_emissions) # M + 1, K. Row 0 is entry probabilities, so emissions are unused, but it still needs to sum to 1.0, so it is [1.0, 0.0, 0.0, ...], but don't use it for any calcs
+    reference_match_emissions=np.asarray(rhmm.match_emissions) # M + 1, K. Row 0 is entry probabilities, so emissions are unused, but it still needs to sum to 1.0, so it is [1.0, 0.0, 0.0, ...], but don't use it for any calcs
+    
+    # query_insert_emissions=np.asarray(qhmm.insert_emissions) # row 0 is insert emissions for left-gaps (before the first match emission) 
+    # reference_insert_emissions=np.asarray(rhmm.insert_emissions) # row 0 is insert emissions for left-gaps (before the first match emission)
+
+    with np.errstate(divide='ignore'):
+        query_transitions=-1 * np.log(np.asarray(qhmm.transition_probabilities))  # M + 1, 7 probabilities are negative natural logs
+        reference_transitions=-1 * np.log(np.asarray(rhmm.transition_probabilities)) # M + 1, 7 probabilities are negative natural logs
+    
+    # print(np.asarray(qhmm.transition_probabilities))
+
+    scores = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0],5),dtype=np.float32) # dim3 = SMM, SMI, SIM, SDG, SGD, for SXY, X is query, Y is reference
+    backtrace = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0],5),dtype=_TRACEBACK_DTYPE) #score_row, score_column, state_type (dim3 of scores array) TODO: should we account for alternative alignments, like by ties in the max fuctions?. TODO: what order of dimensions is best for caching?
+    match_scores = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0]),dtype=np.float32) # scores for match states only, for backtrace
+    # values are flags to the previous state type. There is only one direction from each previous state, so directionality is implied in the state type
+
+
+    compare_hmmer_inner(query_transitions, query_match_emissions, reference_transitions, background, reference_match_emissions, scores, backtrace, match_scores, 0)
 
     max_index = np.unravel_index(np.argmax(scores),scores.shape)  
     score = scores[max_index]
