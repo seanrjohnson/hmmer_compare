@@ -12,6 +12,8 @@ and
 Söding, Johannes. “Protein Homology Detection by HMM–HMM Comparison.” Bioinformatics 21, no. 7 (April 1, 2005): 951–60. https://doi.org/10.1093/bioinformatics/bti125.
 
 """
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='numpy') # suppress "UserWarning: The value of the smallest subnormal for <class 'numpy.float64'> type is zero."
 import argparse
 from dataclasses import dataclass
 import sys
@@ -23,7 +25,6 @@ from pathlib import Path
 import heapq
 from multiprocessing import Pool
 from hmmercompare import __version__, RawAndDefaultsFormatter
-import warnings
 from numba import jit
 import numba as nb
 
