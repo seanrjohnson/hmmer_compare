@@ -65,9 +65,10 @@ _SIM:int = 2
 _SDG:int = 3
 _SGD:int = 4
 _TRACEBACK_DTYPE=np.uint64
-_STOP_FLAG = np.iinfo(_TRACEBACK_DTYPE).max
+_STOP_FLAG = 100000000000000000 #np.iinfo(_TRACEBACK_DTYPE).max
+#             18446744073709551615
 
-@jit(nb.typeof((1.0,1))(nb.float32, nb.float32, nb.uint64, nb.uint64),cache=True)
+@jit(nb.types.Tuple((nb.float32,nb.uint64))(nb.float32, nb.float32, nb.uint64, nb.uint64),cache=True)
 def max2(sMM:float, sXY:float, layer1:int, layer2:int) -> Tuple[float, int]:
     if sMM > sXY:
         score = sMM
@@ -77,7 +78,7 @@ def max2(sMM:float, sXY:float, layer1:int, layer2:int) -> Tuple[float, int]:
         bt = layer2
     return score, bt
 
-@jit(nb.typeof((1.0, 1))(nb.float32, nb.float32, nb.float32, nb.float32, nb.float32, nb.int64),cache=True)
+@jit(nb.types.Tuple((nb.float32, nb.uint64))(nb.float32, nb.float32, nb.float32, nb.float32, nb.float32, nb.int64),cache=True)
 def max6(sMM: float, sMI: float, sIM: float, sDG: float, sGD: float, global_mode:int = 0) -> Tuple[float, int]:
     """
 
@@ -424,7 +425,7 @@ def compare_hmmer_files(query_files:Iterable[str], reference_files:Iterable[str]
         with Pool(processes=cpu) as pool:
             for hits in pool.imap_unordered(worker, pyhmmer.plan7.HMMFile(file)):
                 for hit in hits:
-                    print(sep.join( (hit.query_name,hit.reference_name,f"{round(hit.score,2)}") ), file=out_handle)
+                    print(sep.join( (hit.query_name,hit.reference_name,f"{round(hit.score,2):.2f}") ), file=out_handle)
                     if alignments:
                         print(hit.alignment, file=out_handle)
                         print("\n\n", file=out_handle)
