@@ -258,7 +258,7 @@ def compare_hmmer(qhmm:pyhmmer.plan7.HMM, rhmm:pyhmmer.plan7.HMM) -> Tuple[float
 
     scores = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0],5),dtype=np.float32) # dim3 = SMM, SMI, SIM, SDG, SGD, for SXY, X is query, Y is reference
     backtrace = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0],5),dtype=_TRACEBACK_DTYPE) #score_row, score_column, state_type (dim3 of scores array) TODO: should we account for alternative alignments, like by ties in the max fuctions?. TODO: what order of dimensions is best for caching?
-    match_scores = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0]),dtype=np.float32) # scores for match states only, for backtrace
+    match_scores = np.zeros((query_match_emissions.shape[0], reference_match_emissions.shape[0]),dtype=np.float32) # scores for match states only, for backtrace. Can probably be np.empty.
     # values are flags to the previous state type. There is only one direction from each previous state, so directionality is implied in the state type
 
 
