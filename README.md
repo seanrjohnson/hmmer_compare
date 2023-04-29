@@ -1,7 +1,10 @@
 # hmmer_compare
+
+Version 0.1.0
+
 compare hmmer3 profiles, generate profile alignments, and generate profile trees.
 
-It's kind of slow, so not suitable for comparing large numbers of profiles. More than 100 is ambitious.
+`hmmer_compare.py` is much slower than hhsearch and hhblits, but can still search a single profile against Pfam in about a minute on a single core.
 
 Note: This package is a small slice of a more comprehensive tools suite that I hope to make available before the end of 2023. So apart from bugfixes, I may not maintain it much (unless I decide to use it as a dependency for the broader suite).
 
@@ -67,12 +70,15 @@ Note that `scores_with_alignments.txt` can also be used as input to `table_to_tr
 
 # Contributing
 
-I think this program could be thousands of times faster if the core algorithm was rewritten in C/cython (or maybe Rust). I haven't had time to do that, but I would be very grateful to anyone who does have time! Any other suggestions/contributions are also welcome.
+I think this package does it's job pretty well already. If anybody wants to implement prefiltering, as described in [this paper](https://www.nature.com/articles/nmeth.1818), that would be neat.
+
+Also help with packaging it for Conda and/or PyPI would be welcome.
 
 # Dependencies
     - numpy
     - scipy
     - pyhmmer
+    - numba
 
 # References
 
