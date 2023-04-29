@@ -424,7 +424,7 @@ def compare_hmmer_files(query_files:Iterable[str], reference_files:Iterable[str]
     for file in query_files:
         # file_name = os.path.basename(Path(file).stem)
         with Pool(processes=cpu) as pool:
-            for hits in pool.imap_unordered(worker, pyhmmer.plan7.HMMFile(file)):
+            for hits in pool.imap(worker, pyhmmer.plan7.HMMFile(file), chunksize=1): # I tested some chunk sizes and it didn't seem to make a difference
                 for hit in hits:
                     print(sep.join( (hit.query_name,hit.reference_name,f"{round(hit.score,2):.2f}") ), file=out_handle)
                     if alignments:
