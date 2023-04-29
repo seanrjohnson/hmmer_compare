@@ -6,7 +6,7 @@ compare hmmer3 profiles, generate profile alignments, and generate profile trees
 
 `hmmer_compare.py` is much slower than hhsearch and hhblits, but can still search a single profile against Pfam in about a minute on a single core.
 
-Note: This package is a small slice of a more comprehensive tools suite that I hope to make available before the end of 2023. So apart from bugfixes, I may not maintain it much (unless I decide to use it as a dependency for the broader suite).
+Note: This package is a small slice of a more comprehensive tools suite that I hope to make available before the end of 2023. So apart from bugfixes, I probably won't maintain it much.
 
 
 # Installation
