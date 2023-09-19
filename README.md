@@ -1,6 +1,8 @@
 # hmmer_compare
 
-Version 0.1.0
+Version 0.1.1
+[![DOI](https://sandbox.zenodo.org/badge/602739376.svg)](https://sandbox.zenodo.org/badge/latestdoi/602739376)
+
 
 compare hmmer3 profiles, generate profile alignments, and generate profile trees.
 
